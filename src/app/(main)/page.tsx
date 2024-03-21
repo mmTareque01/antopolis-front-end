@@ -22,6 +22,7 @@ import { CALL_GET_CATEGORIES } from "@/apis/category.apis";
 import React from "react";
 import { CALL_GET_ANIMALS } from "@/apis/animal.apis";
 import { responseCode } from "@/apis/config";
+import Loading from "@/components/Loading";
 
 interface Animal {
   name: string;
@@ -39,6 +40,7 @@ export default function Home() {
   const [animals, setAnimals] = React.useState<AnimalData[]>([]);
   const [query, setQuery] = React.useState("");
   const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchCategory = async () => {
@@ -54,6 +56,8 @@ export default function Home() {
 
     fetchCategory(); // Call fetchData when the component mounts
   }, []);
+
+  console.log("query=> ", query);
 
   React.useEffect(() => {
     const fetchAnimals = async () => {
@@ -73,10 +77,12 @@ export default function Home() {
         console.error("Error fetching categories:", error);
         console.log("heer");
         // Handle errors, e.g., display error message to the user
+        setError("Something went wrong!");
       }
     };
 
     fetchAnimals(); // Call fetchData when the component mounts
+    setLoading(false);
   }, [query]);
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -90,6 +96,7 @@ export default function Home() {
               handleAnimal={(q: string) => {
                 setQuery(q);
               }}
+              active={query ? false : true}
             />
             {category.map((itm: { category_id: string; name: string }) => (
               <Category
@@ -97,8 +104,10 @@ export default function Home() {
                 category={itm.name}
                 id={itm.category_id}
                 handleAnimal={(q: string) => {
+                  setLoading(true);
                   setQuery(q);
                 }}
+                active={itm.category_id == query}
               />
             ))}
           </div>
@@ -137,16 +146,20 @@ export default function Home() {
         {/* {error ? <p className="text-red-500 text-center">{error}</p> : <span>dlsdf</span>}
          */}
         <p className="text-red-500 text-center">{error}</p>
-        <div className="flex flex-wrap justify-center">
-          {animals?.map(({ animal, category }: any) => (
-            <ImageBox
-              key={animal?._id}
-              src={animal?.image_url}
-              alt={category}
-              caption={animal?.name}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <Loading />
+        ) : (
+          <div className="flex flex-wrap justify-center">
+            {animals?.map(({ animal, category }: any) => (
+              <ImageBox
+                key={animal?._id}
+                src={animal?.image_url}
+                alt={category}
+                caption={animal?.name}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );

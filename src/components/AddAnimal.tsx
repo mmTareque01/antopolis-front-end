@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { CALL_CREATE_ANIMAL } from "@/apis/animal.apis";
+import Loading from "./Loading";
 
 interface animalData {
   category_id: string;
@@ -24,25 +25,41 @@ export default function AddAnimal({ categories, setAnimals }: any) {
   const [animal, setAnimal] = React.useState<animalData>({
     category_id: "",
     name: "",
-    image:""
+    image: "",
   });
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
-
-  console.log(categories)
+  const [loading, setLoading] = React.useState(false);
 
   const handleCreateAnimal = async () => {
-    CALL_CREATE_ANIMAL(animal)
-      .then((res) => {
-        setAnimals([res.data]);
-        // console.log(res.data)
-        setSuccess("Animal created successfully!");
-        setError("");
-      })
-      .catch((error) => {
-        setSuccess("");
-        setError("Creating animal failed!");
-      });
+    setLoading(true);
+    if (animal.category_id && animal.name && animal.image) {
+      CALL_CREATE_ANIMAL(animal)
+        .then((res) => {
+          setAnimals([res.data]);
+          // console.log(res.data)
+          setSuccess("Animal created successfully!");
+          setError("");
+          setLoading(false);
+        })
+        .catch((error) => {
+          setSuccess("");
+          setError("Creating animal failed!");
+          setLoading(false);
+        });
+    }
+
+    if (!animal.category_id) {
+      setError("Category is not selected!");
+    }
+    if (!animal.name) {
+      setError("Name is blank.");
+    }
+    if (!animal.image) {
+      setError("Please select an image.");
+    }
+    
+    return;
   };
   return (
     <DialogContent className="bg-white  sm:max-w-[425px]">
@@ -78,17 +95,19 @@ export default function AddAnimal({ categories, setAnimals }: any) {
         </select>
         <Input
           id="name"
-          onChange={(e:any) => {
+          onChange={(e: any) => {
             setAnimal({ ...animal, name: e.target.value });
           }}
           placeholder="Name"
           className="rounded-xl"
           defaultValue={animal.name}
+          required
         />
 
         <Input
+          required
           type="file"
-          onChange={(e:any) => {
+          onChange={(e: any) => {
             setAnimal({ ...animal, image: e.target.files[0] });
           }}
           id="name"
@@ -96,9 +115,17 @@ export default function AddAnimal({ categories, setAnimals }: any) {
           className="rounded-xl"
         />
 
+        {loading ? (
+          <div className="block inline h-[100px]">
+            <Loading />
+          </div>
+        ) : null}
+
         <Button
+          disabled={loading}
           onClick={() => {
             // console.log(animal);
+            setLoading(true)
             handleCreateAnimal();
           }}
           className=" rounded-xl bg-gray-300"
