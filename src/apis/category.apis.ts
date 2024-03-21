@@ -9,6 +9,7 @@ export const CALL_GET_CATEGORIES = async () => {
     return category.data.data;
   } catch (error) {
     // error(error)
+    console.log("error is called")
     return error;
   }
 };

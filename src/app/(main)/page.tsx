@@ -21,12 +21,22 @@ import AddAnimal from "@/components/AddAnimal";
 import { CALL_GET_CATEGORIES } from "@/apis/category.apis";
 import React from "react";
 import { CALL_GET_ANIMALS } from "@/apis/animal.apis";
-import { it } from "node:test";
 import { responseCode } from "@/apis/config";
+
+interface Animal {
+  name: string;
+  image_url: string;
+  _id: string;
+}
+
+interface AnimalData {
+  category: string;
+  animal: Animal;
+}
 
 export default function Home() {
   const [category, setCategory] = React.useState([]);
-  const [animals, setAnimals] = React.useState([]);
+  const [animals, setAnimals] = React.useState<AnimalData[]>([]);
   const [query, setQuery] = React.useState("");
   const [error, setError] = React.useState("");
 
@@ -34,10 +44,11 @@ export default function Home() {
     const fetchCategory = async () => {
       try {
         const categoryData = await CALL_GET_CATEGORIES();
+        console.log(categoryData);
         setCategory(categoryData);
       } catch (error) {
+        console.log("erorr ");
         console.error("Error fetching categories:", error);
-        // Handle errors, e.g., display error message to the user
       }
     };
 
@@ -49,11 +60,13 @@ export default function Home() {
       try {
         const animalData = await CALL_GET_ANIMALS(query);
 
-        if (animalData.status !== responseCode.success_status) {
+        if (animalData.status != responseCode.success_status) {
           setError(animalData.message);
-          console.log(animalData);
+          console.log("inside error");
+          setAnimals(animalData.data);
+          return;
         }
-
+        console.log(animalData.status);
         setAnimals(animalData.data);
         setError("");
       } catch (error) {
@@ -67,7 +80,7 @@ export default function Home() {
   }, [query]);
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <section className="auto max-w-[1250px] bg-red[500] px-5 py-7 ">
+      <section className="auto w-[1250px] bg-red[500] px-5 py-7 ">
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-8 p-4 flex flex-wrap">
             <Category
@@ -78,17 +91,18 @@ export default function Home() {
                 setQuery(q);
               }}
             />
-            {category.map((itm: { _id: string; name: string }) => (
+            {category.map((itm: { category_id: string; name: string }) => (
               <Category
-                key={itm._id}
+                key={itm.category_id}
                 category={itm.name}
-                id={itm._id}
+                id={itm.category_id}
                 handleAnimal={(q: string) => {
                   setQuery(q);
                 }}
               />
             ))}
           </div>
+
           <div className="col-span-4  p-4 flex-auto flex-wrap">
             <Dialog>
               <DialogTrigger asChild>
@@ -98,8 +112,8 @@ export default function Home() {
               </DialogTrigger>
               <AddAnimal
                 categories={category}
-                setAnimals={(data: any) => {
-                  setAnimals({ ...animals, ...data });
+                setAnimals={(data: Array<AnimalData>) => {
+                  setAnimals([...animals, ...data]);
                 }}
               />
             </Dialog>
@@ -120,9 +134,10 @@ export default function Home() {
             </Dialog>
           </div>
         </div>
-
+        {/* {error ? <p className="text-red-500 text-center">{error}</p> : <span>dlsdf</span>}
+         */}
+        <p className="text-red-500 text-center">{error}</p>
         <div className="flex flex-wrap justify-center">
-          {error ? <p className="text-red-500 text-center">{error}</p> : null}
           {animals?.map(({ animal, category }: any) => (
             <ImageBox
               key={animal?._id}

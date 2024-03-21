@@ -15,24 +15,27 @@ import { Button } from "@/components/ui/button";
 import { CALL_CREATE_ANIMAL } from "@/apis/animal.apis";
 
 interface animalData {
-  categoryId: string;
+  category_id: string;
   name: string;
   image?: any;
 }
 
 export default function AddAnimal({ categories, setAnimals }: any) {
   const [animal, setAnimal] = React.useState<animalData>({
-    categoryId: "",
+    category_id: "",
     name: "",
     image:""
   });
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
 
+  console.log(categories)
+
   const handleCreateAnimal = async () => {
     CALL_CREATE_ANIMAL(animal)
       .then((res) => {
-        setAnimals(res.data);
+        setAnimals([res.data]);
+        // console.log(res.data)
         setSuccess("Animal created successfully!");
         setError("");
       })
@@ -56,7 +59,7 @@ export default function AddAnimal({ categories, setAnimals }: any) {
         <select
           onChange={(e) => {
             // alert(e.target.value);
-            setAnimal({ ...animal, categoryId: e.target.value[0] });
+            setAnimal({ ...animal, category_id: e.target.value });
           }}
           className="py-2 rounded-xl px-2"
           name="cars"
@@ -67,7 +70,7 @@ export default function AddAnimal({ categories, setAnimals }: any) {
             <option
               key={idx}
               className="capitalize py-2 my-2"
-              value={category._id}
+              value={category.category_id}
             >
               {category.name}
             </option>
@@ -75,7 +78,7 @@ export default function AddAnimal({ categories, setAnimals }: any) {
         </select>
         <Input
           id="name"
-          onChange={(e) => {
+          onChange={(e:any) => {
             setAnimal({ ...animal, name: e.target.value });
           }}
           placeholder="Name"
@@ -85,8 +88,8 @@ export default function AddAnimal({ categories, setAnimals }: any) {
 
         <Input
           type="file"
-          onChange={(e) => {
-            setAnimal({ ...animal, image: e.target.files });
+          onChange={(e:any) => {
+            setAnimal({ ...animal, image: e.target.files[0] });
           }}
           id="name"
           placeholder="Name"

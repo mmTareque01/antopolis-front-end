@@ -13,9 +13,10 @@ export const CALL_GET_ANIMALS = async (q: string) => {
   }
 };
 
-export const CALL_CREATE_ANIMAL = async (data: { name: string }) => {
+export const CALL_CREATE_ANIMAL = async (data: { name: string, category_id: string, image?: any }) => {
+  // console.log("end: ", { ...data, image: data.image })
   try {
-    const category = await axios.post(`${BASE}/animal/create`, data, {
+    const category = await axios.post(`${BASE}/animal/create`, { ...data, image: data.image }, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
