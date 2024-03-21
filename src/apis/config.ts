@@ -4,7 +4,7 @@ export const config = {
   },
 };
 
-export const BASE = "http://localhost:5000";
+export const BASE = "https://antopolis-back-end-new.vercel.app";
 
 export const responseCode = {
   success_status: "AP200",
